@@ -37,6 +37,15 @@ class DQNAgent:
 
         self.num_steps = 0
 
+    def load_model(self, path, start_step):
+        self.policy_net.load_state_dict(torch.load(path, map_location=self.device))
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.num_steps = start_step
+        
+        curr_epsilon = self.epsilon_start - (self.epsilon_start - self.epsilon_end) * (self.num_steps / self.epsilon_decay)
+        self.epsilon = max(self.epsilon_end, curr_epsilon)
+
+
     def take_action(self, state):
         if random.random() < self.epsilon:
             return self.action_space.sample()
@@ -49,18 +58,19 @@ class DQNAgent:
     def step(self, state, action, reward, next_state, done):
         self.memory.append(state, action, reward, next_state, done)
 
+        self.num_steps += 1
+
         if len(self.memory) < self.train_buffer:
             return
         
         if len(self.memory) == self.train_buffer:
             print("Enough samples in buffer to start training")
         
-        self.optimize()
+        if self.num_steps % 4 == 0:
+            self.optimize()
         
         self.epsilon -= (self.epsilon_start - self.epsilon_end) / 1000000
         self.epsilon = max(self.epsilon_end, self.epsilon)
-
-        self.num_steps += 1
 
         if self.num_steps % self.target_update_freq == 0:
             self.target_net.load_state_dict(self.policy_net.state_dict())

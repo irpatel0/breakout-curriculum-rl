@@ -1,0 +1,63 @@
+import yaml
+import gc
+import torch
+import os
+from train import create_env, train_DQN
+from agent import DQNAgent
+from torch.utils.tensorboard import SummaryWriter
+from colorama import init, Fore, Style
+
+#colorama init
+init()
+
+def clear_memory(agent, env):
+    del agent
+    del env
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+def run_experiment(config_path):
+
+    # --------------SETUP --------------
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    training_config = config["training"]
+    total_steps = training_config["steps"]
+    success_thresh = training_config["success_thresh"]
+
+    os.makedirs("checkpoints", exist_ok=True)
+
+    # --------------TRAINING EASY--------------
+    print(Fore.GREEN + "Training Easy" + Style.RESET_ALL)
+    easy_env = create_env(config["env"], 0)
+    easy_agent = DQNAgent(easy_env.action_space)
+    train_DQN(easy_agent, total_steps, 0, easy_env, "base_easy", success_thresh, save_halfway=True)
+    clear_memory(easy_agent, easy_env)
+
+    # --------------TRAINING HARD--------------
+    print(Fore.RED + "Training Hard" + Style.RESET_ALL)
+    hard_env = create_env(config["env"], 1)
+    hard_agent = DQNAgent(hard_env.action_space)
+    train_DQN(hard_agent, total_steps, 0, hard_env, "base_hard", success_thresh, save_halfway=True)
+    clear_memory(hard_agent, hard_env)
+
+    # --------------TRAINING CURRICULUM (EASY -> HARD) --------------
+    print(Fore.GREEN + "Training Curriculum (Easy -> Hard)" + Style.RESET_ALL)
+    curriculum_env = create_env(config["env"], 1)
+    curriculum_agent = DQNAgent(curriculum_env.action_space)
+    curriculum_agent.load_model("checkpoints/base_easy_half.pth", start_step=total_steps//2)
+    train_DQN(curriculum_agent, total_steps//2, total_steps//2, curriculum_env, "curriculum", success_thresh, save_halfway=False)
+    clear_memory(curriculum_agent, curriculum_env)
+
+    # --------------TRAINING REVERSE CURRICULUM (HARD -> EASY) --------------
+    print(Fore.RED + "Training Reverse Curriculum (Hard -> Easy)" + Style.RESET_ALL)
+    reverse_curriculum_env = create_env(config["env"], 0)
+    reverse_curriculum_agent = DQNAgent(reverse_curriculum_env.action_space)
+    reverse_curriculum_agent.load_model("checkpoints/base_hard_half.pth", start_step=total_steps//2)
+    train_DQN(reverse_curriculum_agent, total_steps//2, total_steps//2, reverse_curriculum_env, "reverse_curriculum", success_thresh, save_halfway=False)
+    clear_memory(reverse_curriculum_agent, reverse_curriculum_env)
+
+if __name__ == "__main__":
+    run_experiment(config_path="config.yaml")

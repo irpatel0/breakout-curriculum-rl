@@ -1,0 +1,21 @@
+env:
+  screen_size: 84
+  grayscale_obs: true
+  stack_size: 4
+
+agent:
+  batch_size: 32
+  gamma: 0.99
+  epsilon_start: 1.0
+  epsilon_end: 0.1
+  epsilon_decay: 1000000
+  target_update_freq: 10000
+  learning_rate: 0.0001
+  buffer_capacity: 1000000
+  train_buffer: 25000
+
+training:
+  steps: 30000
+  moving_avg_reward_window: 100
+  success_thresh: 10
+
