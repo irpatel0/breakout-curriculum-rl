@@ -8,24 +8,24 @@ import torch.nn.functional as F
 import numpy as np
 
 class DQNAgent:
-    def __init__(self, action_space):
+    def __init__(self, action_space, config, total_steps):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.action_space = action_space
 
         #hyperparams
-        self.batch_size = 32
-        self.gamma = 0.99
+        self.batch_size = config["batch_size"]
+        self.gamma = config["gamma"]
 
         #Epsilon represents how likely we are to take a random action instead of the action with the highest Q-val
         #Encourage random exploring to start, slowly decay until 10%
-        self.epsilon_start = 1.0
-        self.epsilon_end = 0.1
+        self.epsilon_start = config["epsilon_start"]
+        self.epsilon_end = config["epsilon_end"]
         self.epsilon = self.epsilon_start
-        self.epsilon_decay = 1000000
-        self.target_update_freq = 10000
-        self.learning_rate = 1e-4
-        self.buffer_capacity = 1000000
-        self.train_buffer = 25000
+        self.decay_steps = total_steps * config["decay_proportion"]
+        self.target_update_freq = config["target_update_freq"]
+        self.learning_rate = config["learning_rate"]
+        self.buffer_capacity = config["buffer_capacity"]
+        self.train_buffer = config["train_buffer"]
 
         self.policy_net = AtariDQN(stacked_frames=4, num_actions=action_space.n).to(self.device)
         self.target_net = AtariDQN(stacked_frames=4, num_actions=action_space.n).to(self.device)
@@ -42,7 +42,7 @@ class DQNAgent:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.num_steps = start_step
         
-        curr_epsilon = self.epsilon_start - (self.epsilon_start - self.epsilon_end) * (self.num_steps / self.epsilon_decay)
+        curr_epsilon = self.epsilon_start - (self.epsilon_start - self.epsilon_end) * (self.num_steps / self.decay_steps)
         self.epsilon = max(self.epsilon_end, curr_epsilon)
 
 
@@ -69,7 +69,7 @@ class DQNAgent:
         if self.num_steps % 4 == 0:
             self.optimize()
         
-        self.epsilon -= (self.epsilon_start - self.epsilon_end) / 1000000
+        self.epsilon -= (self.epsilon_start - self.epsilon_end) / self.decay_steps
         self.epsilon = max(self.epsilon_end, self.epsilon)
 
         if self.num_steps % self.target_update_freq == 0:

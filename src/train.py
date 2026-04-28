@@ -17,7 +17,7 @@ def create_env(env_config, difficulty):
     env = FrameStackObservation(env, stack_size=env_config["stack_size"])
     return env
 
-def train_DQN(agent, num_steps, start_step, env, pth_name, success_thresh, save_halfway):
+def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_thresh, save_halfway):
 
     writer = SummaryWriter(log_dir=f"logs/{pth_name}")
 

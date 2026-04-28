@@ -1,21 +1,21 @@
 env:
-  screen_size: 84
-  grayscale_obs: true
-  stack_size: 4
+  screen_size: 84 #size to resize obs to
+  grayscale_obs: true #whether to convert obs to grayscale
+  stack_size: 4 #number of frames to stack for obs
 
 agent:
-  batch_size: 32
-  gamma: 0.99
-  epsilon_start: 1.0
-  epsilon_end: 0.1
-  epsilon_decay: 1000000
-  target_update_freq: 10000
-  learning_rate: 0.0001
-  buffer_capacity: 1000000
-  train_buffer: 25000
+  batch_size: 32 #batch size for training
+  gamma: 0.99 #discount factor
+  epsilon_start: 1.0 #initial epsilon for exploration
+  epsilon_end: 0.1 #min epsilon for exploration
+  decay_proportion: 0.8 #proportion of training steps over which to decay epsilon
+  target_update_freq: 10000 #steps between target network updates
+  learning_rate: 0.0001 #lr for optimizer
+  buffer_capacity: 1000000 #buffer size for experience replay
+  train_buffer: 25000 #steps required before training starts
 
 training:
-  steps: 30000
-  moving_avg_reward_window: 100
-  success_thresh: 10
+  steps: 30000 #number of steps to train each agent
+  moving_avg_reward_window: 100 #window size for average reward
+  success_thresh: 10 #avg reward threshold to consider the agent successful
 
