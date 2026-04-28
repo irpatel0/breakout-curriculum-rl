@@ -17,7 +17,31 @@ def create_env(env_config, difficulty):
     env = FrameStackObservation(env, stack_size=env_config["stack_size"])
     return env
 
-def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_thresh, save_halfway):
+def eval_DQN(agent, env_config, difficulty, num_episodes=100):
+    env = create_env(env_config, difficulty)
+
+    stored_epsilon = agent.epsilon
+    agent.epsilon = 0.0
+
+    total_rewards = []
+    for episode in range(num_episodes):
+        obs, _ = env.reset()
+        done = False
+        episode_reward = 0
+
+        while not done:
+            action = agent.take_action(obs)
+            obs, reward, done, truncated, _ = env.step(action)
+            episode_reward += reward
+
+        total_rewards.append(episode_reward)
+
+    agent.epsilon = stored_epsilon
+    env.close()
+
+    return np.mean(total_rewards)
+
+def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_thresh, save_halfway, env_config, difficulty, eval_interval, eval_episodes):
 
     writer = SummaryWriter(log_dir=f"logs/{pth_name}")
 
@@ -41,7 +65,7 @@ def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_
         if done:
             obs, _ = env.reset()
             past_episode_rewards.append(episode_reward)
-            if len(past_episode_rewards) > 50:
+            if len(past_episode_rewards) > window_size:
                 past_episode_rewards.pop(0)
 
             avg_reward = np.mean(past_episode_rewards)
@@ -56,6 +80,10 @@ def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_
             episode_reward = 0
         else:
             obs = next_obs
+
+        if (step + 1) % eval_interval == 0:
+            eval_reward = eval_DQN(agent, env_config, difficulty, num_episodes=eval_episodes)
+            writer.add_scalar(f"Rewards/Eval_Rewards", eval_reward, step)
 
         if save_halfway and step == halfway_step - 1:
             torch.save(agent.policy_net.state_dict(), f"checkpoints/{pth_name}_half.pth")

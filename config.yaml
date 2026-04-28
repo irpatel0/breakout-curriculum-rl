@@ -8,14 +8,16 @@ agent:
   gamma: 0.99 #discount factor
   epsilon_start: 1.0 #initial epsilon for exploration
   epsilon_end: 0.1 #min epsilon for exploration
-  decay_proportion: 0.8 #proportion of training steps over which to decay epsilon
+  decay_proportion: 0.4 #proportion of training steps over which to decay epsilon
   target_update_freq: 10000 #steps between target network updates
   learning_rate: 0.0001 #lr for optimizer
   buffer_capacity: 1000000 #buffer size for experience replay
   train_buffer: 25000 #steps required before training starts
 
 training:
-  steps: 30000 #number of steps to train each agent
-  moving_avg_reward_window: 100 #window size for average reward
+  steps: 500000 #number of steps to train each agent
+  moving_avg_reward_window: 50 #window size for average reward
   success_thresh: 10 #avg reward threshold to consider the agent successful
+  num_checkpoints: 10 #number of evaluations to perform during training
+  eval_episodes: 20 #number of episodes to run for evaluation
 

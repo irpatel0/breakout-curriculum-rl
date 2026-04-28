@@ -63,9 +63,6 @@ class DQNAgent:
         if len(self.memory) < self.train_buffer:
             return
         
-        if len(self.memory) == self.train_buffer:
-            print("Enough samples in buffer to start training")
-        
         if self.num_steps % 4 == 0:
             self.optimize()
         
