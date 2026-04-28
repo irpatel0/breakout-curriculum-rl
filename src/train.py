@@ -21,15 +21,16 @@ def eval_DQN(agent, env_config, difficulty, num_episodes=100):
     env = create_env(env_config, difficulty)
 
     stored_epsilon = agent.epsilon
-    agent.epsilon = 0.0
+    agent.epsilon = 0.05
 
     total_rewards = []
     for episode in range(num_episodes):
         obs, _ = env.reset()
         done = False
+        truncated = False
         episode_reward = 0
 
-        while not done:
+        while not done and not truncated:
             action = agent.take_action(obs)
             obs, reward, done, truncated, _ = env.step(action)
             episode_reward += reward
@@ -62,7 +63,7 @@ def train_DQN(agent, num_steps, start_step, env, pth_name, window_size, success_
         agent.step(obs, action, reward, next_obs, done)
 
         #set obs to the new observation
-        if done:
+        if done or truncated:
             obs, _ = env.reset()
             past_episode_rewards.append(episode_reward)
             if len(past_episode_rewards) > window_size:

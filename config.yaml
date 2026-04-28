@@ -15,9 +15,9 @@ agent:
   train_buffer: 25000 #steps required before training starts
 
 training:
-  steps: 500000 #number of steps to train each agent
+  steps: 30000 #number of steps to train each agent
   moving_avg_reward_window: 50 #window size for average reward
   success_thresh: 10 #avg reward threshold to consider the agent successful
-  num_checkpoints: 10 #number of evaluations to perform during training
-  eval_episodes: 20 #number of episodes to run for evaluation
+  num_checkpoints: 5 #number of evaluations to perform during training
+  eval_episodes: 5 #number of episodes to run for evaluation
 
