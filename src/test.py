@@ -55,7 +55,10 @@ def test_DQN():
     env.close()
 
     avg_reward = np.mean(total_rewards)
+    std_reward = np.std(total_rewards)
+
     print(f"Average Reward over {args.test_episodes} episodes: {avg_reward}")
+    print(f"STD. of Reward over {args.test_episodes} episodes: {std_reward}")
 
 if __name__ == "__main__":
     test_DQN()

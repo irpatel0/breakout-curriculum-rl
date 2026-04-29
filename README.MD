@@ -1,3 +1,1 @@
-init
-
-Replay Buffer Memory
+python3 src/test.py --model_path checkpoints/base_easy_final.pth --difficulty 1 --test_episodes 10 
