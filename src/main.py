@@ -43,7 +43,7 @@ def run_experiment(config_path):
     easy_env = create_env(config["env"], 0)
     easy_agent = DQNAgent(easy_env.action_space, agent_config, total_steps)
     #train
-    train_DQN(easy_agent, total_steps, 0, easy_env, "base_easy_short", window_size, success_thresh, save_halfway=True, 
+    train_DQN(easy_agent, total_steps, 0, easy_env, "easy_only", window_size, success_thresh, save_halfway=True, 
               env_config=env_config, difficulty=0, eval_interval=eval_interval, eval_episodes=eval_episodes)
     #cleanup
     clear_memory(easy_agent, easy_env)
@@ -54,7 +54,7 @@ def run_experiment(config_path):
     hard_env = create_env(config["env"], 1)
     hard_agent = DQNAgent(hard_env.action_space, agent_config, total_steps)
     #train
-    train_DQN(hard_agent, total_steps, 0, hard_env, "base_hard_short", window_size, success_thresh, save_halfway=True, 
+    train_DQN(hard_agent, total_steps, 0, hard_env, "hard_only", window_size, success_thresh, save_halfway=True, 
               env_config=env_config, difficulty=1, eval_interval=eval_interval, eval_episodes=eval_episodes)
     #cleanup
     clear_memory(hard_agent, hard_env)
@@ -64,9 +64,9 @@ def run_experiment(config_path):
     #create env & agent, load the model weights
     curriculum_env = create_env(config["env"], 1)
     curriculum_agent = DQNAgent(curriculum_env.action_space, agent_config, total_steps)
-    curriculum_agent.load_model("checkpoints/base_easy_short_half.pth", start_step=total_steps//2)
+    curriculum_agent.load_model("checkpoints/easy_only_half.pth", start_step=total_steps//2)
     #train
-    train_DQN(curriculum_agent, total_steps//2, total_steps//2, curriculum_env, "curriculum_short", window_size, success_thresh, save_halfway=False, 
+    train_DQN(curriculum_agent, total_steps//2, total_steps//2, curriculum_env, "curriculum", window_size, success_thresh, save_halfway=False, 
               env_config=env_config, difficulty=1, eval_interval=eval_interval, eval_episodes=eval_episodes)
     #cleanup
     clear_memory(curriculum_agent, curriculum_env)
@@ -76,9 +76,9 @@ def run_experiment(config_path):
     #create env & agent, load the model weights
     reverse_curriculum_env = create_env(config["env"], 0)
     reverse_curriculum_agent = DQNAgent(reverse_curriculum_env.action_space, agent_config, total_steps)
-    reverse_curriculum_agent.load_model("checkpoints/base_hard_short_half.pth", start_step=total_steps//2)
+    reverse_curriculum_agent.load_model("checkpoints/hard_only_half.pth", start_step=total_steps//2)
     #train
-    train_DQN(reverse_curriculum_agent, total_steps//2, total_steps//2, reverse_curriculum_env, "reverse_curriculum_short", window_size, success_thresh, save_halfway=False, 
+    train_DQN(reverse_curriculum_agent, total_steps//2, total_steps//2, reverse_curriculum_env, "reverse_curriculum", window_size, success_thresh, save_halfway=False, 
               env_config=env_config, difficulty=0, eval_interval=eval_interval, eval_episodes=eval_episodes)
     #cleanup
     clear_memory(reverse_curriculum_agent, reverse_curriculum_env)
