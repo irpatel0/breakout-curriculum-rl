@@ -10,6 +10,8 @@ from colorama import init, Fore, Style
 #colorama init
 init()
 
+#delete the environment and agent objects, garbage collect, and empty GPU cache
+#this is necessary so that we can train multiple agents in one run
 def clear_memory(agent, env):
     del agent
     del env
@@ -37,36 +39,48 @@ def run_experiment(config_path):
 
     # --------------TRAINING EASY--------------
     print(Fore.GREEN + "Training Easy" + Style.RESET_ALL)
+    #create env & agent
     easy_env = create_env(config["env"], 0)
     easy_agent = DQNAgent(easy_env.action_space, agent_config, total_steps)
-    train_DQN(easy_agent, total_steps, 0, easy_env, "base_easy", window_size, success_thresh, save_halfway=True, 
+    #train
+    train_DQN(easy_agent, total_steps, 0, easy_env, "base_easy_short", window_size, success_thresh, save_halfway=True, 
               env_config=env_config, difficulty=0, eval_interval=eval_interval, eval_episodes=eval_episodes)
+    #cleanup
     clear_memory(easy_agent, easy_env)
 
     # --------------TRAINING HARD--------------
     print(Fore.RED + "Training Hard" + Style.RESET_ALL)
+    #create env & agent
     hard_env = create_env(config["env"], 1)
     hard_agent = DQNAgent(hard_env.action_space, agent_config, total_steps)
-    train_DQN(hard_agent, total_steps, 0, hard_env, "base_hard", window_size, success_thresh, save_halfway=True, 
+    #train
+    train_DQN(hard_agent, total_steps, 0, hard_env, "base_hard_short", window_size, success_thresh, save_halfway=True, 
               env_config=env_config, difficulty=1, eval_interval=eval_interval, eval_episodes=eval_episodes)
+    #cleanup
     clear_memory(hard_agent, hard_env)
 
     # --------------TRAINING CURRICULUM (EASY -> HARD) --------------
     print(Fore.GREEN + "Training Curriculum (Easy -> Hard)" + Style.RESET_ALL)
+    #create env & agent, load the model weights
     curriculum_env = create_env(config["env"], 1)
     curriculum_agent = DQNAgent(curriculum_env.action_space, agent_config, total_steps)
-    curriculum_agent.load_model("checkpoints/base_easy_half.pth", start_step=total_steps//2)
-    train_DQN(curriculum_agent, total_steps//2, total_steps//2, curriculum_env, "curriculum", window_size, success_thresh, save_halfway=False, 
+    curriculum_agent.load_model("checkpoints/base_easy_short_half.pth", start_step=total_steps//2)
+    #train
+    train_DQN(curriculum_agent, total_steps//2, total_steps//2, curriculum_env, "curriculum_short", window_size, success_thresh, save_halfway=False, 
               env_config=env_config, difficulty=1, eval_interval=eval_interval, eval_episodes=eval_episodes)
+    #cleanup
     clear_memory(curriculum_agent, curriculum_env)
 
     # --------------TRAINING REVERSE CURRICULUM (HARD -> EASY) --------------
     print(Fore.RED + "Training Reverse Curriculum (Hard -> Easy)" + Style.RESET_ALL)
+    #create env & agent, load the model weights
     reverse_curriculum_env = create_env(config["env"], 0)
     reverse_curriculum_agent = DQNAgent(reverse_curriculum_env.action_space, agent_config, total_steps)
-    reverse_curriculum_agent.load_model("checkpoints/base_hard_half.pth", start_step=total_steps//2)
-    train_DQN(reverse_curriculum_agent, total_steps//2, total_steps//2, reverse_curriculum_env, "reverse_curriculum", window_size, success_thresh, save_halfway=False, 
+    reverse_curriculum_agent.load_model("checkpoints/base_hard_short_half.pth", start_step=total_steps//2)
+    #train
+    train_DQN(reverse_curriculum_agent, total_steps//2, total_steps//2, reverse_curriculum_env, "reverse_curriculum_short", window_size, success_thresh, save_halfway=False, 
               env_config=env_config, difficulty=0, eval_interval=eval_interval, eval_episodes=eval_episodes)
+    #cleanup
     clear_memory(reverse_curriculum_agent, reverse_curriculum_env)
 
 if __name__ == "__main__":

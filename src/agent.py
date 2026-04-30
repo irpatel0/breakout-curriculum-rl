@@ -113,8 +113,10 @@ class DQNAgent:
         #the actual reward + the following expected reward for the taken action 
         # in other words policy estimation of Q(s, a) vs reward + gamma * target estimation of max Q(s', a')
 
+        #MAE for loss > 1, MSE for loss < 1
         loss = F.smooth_l1_loss(policy_Q_guess, expected_Q)
 
+        #gradient descent with clipping
         self.optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)

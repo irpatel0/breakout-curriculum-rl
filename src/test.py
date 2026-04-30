@@ -9,6 +9,7 @@ from tqdm import tqdm
 import yaml
 from agent import DQNAgent
 
+#register env
 gym.register_envs(ale_py)
 
 def create_env(env_config, difficulty, render_game=False):
@@ -30,15 +31,21 @@ def test_DQN():
     with open(args.config_path, "r") as file:
         config = yaml.safe_load(file)
 
+    #Create environment and agent
     env = create_env(config["env"], difficulty=args.difficulty, render_game=args.render)
     agent = DQNAgent(env.action_space, config["agent"], config["training"]["steps"])
 
+    #Load the parameters into DQN
     agent.policy_net.load_state_dict(torch.load(args.model_path, map_location=agent.device))
     agent.policy_net.eval()
+    #Use a low epsilon, we want the almost always use the model for actions
+    #small chance of random action so we don't get stuck
     agent.epsilon = 0.01
 
+    #track all episode rewards
     total_rewards = []
 
+    #run [test_episodes] games
     for episode in tqdm(range(args.test_episodes)):
         obs, _ = env.reset()
         done = False
@@ -48,12 +55,14 @@ def test_DQN():
         while not done and not truncated:
             action = agent.take_action(obs)
             obs, reward, done, truncated, _ = env.step(action)
+            #add each step reward to the cumulative episode reward
             episode_reward += reward
 
         total_rewards.append(episode_reward)
 
     env.close()
 
+    #Print mean and standard deviation of rewards
     avg_reward = np.mean(total_rewards)
     std_reward = np.std(total_rewards)
 

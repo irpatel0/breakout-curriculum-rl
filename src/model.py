@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
+#Following the DQN architecture used in Mnih's 2015 paper
 class AtariDQN(nn.Module):
     def __init__(self, stacked_frames, num_actions):
         super(AtariDQN, self).__init__()
