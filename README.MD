@@ -37,10 +37,10 @@ Performance can be monitored on Tensorboard
 
 4. **Testing Agents**
 
-Quick test: Testing a model on easy mode over 100 episodes
+Quick test: Testing the easy-only model on easy mode over 100 episodes
 
 ```bash
-python src/test.py --model_path checkpoints/easy_only_final.pth --test_episodes 100 --difficulty 0
+python src/test.py --model_path checkpoints/easy_final.pth --test_episodes 100 --difficulty 0
 ```
 
 

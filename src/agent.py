@@ -11,7 +11,7 @@ class DQNAgent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.action_space = action_space
 
-        # -- hyperparams --
+        #hyperparams
         self.learning_rate = config["learning_rate"]
         self.batch_size = config["batch_size"]
         #how valuable future rewards are
