@@ -1,7 +1,6 @@
 import torch
 import torch.optim as optim
 import random
-import math
 from model import AtariDQN
 from replayBuffer import ReplayBuffer
 import torch.nn.functional as F
